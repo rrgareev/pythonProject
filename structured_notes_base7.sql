@@ -7,11 +7,20 @@ CREATE TABLE IF NOT EXISTS public.note_params
 (
     id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     "IssueDate" date,
-    "Side" character varying,
-    "Notional" numeric,
-    "Currency" character varying,
+    "Side" character varying NOT NULL,
+    "Notional" numeric NOT NULL,
+    "Currency" character varying NOT NULL,
     "DayCountBasis" character varying,
     "ISIN" character varying,
+    "FoucusID" character varying,
+    "NoteSeries" character varying,
+    "IssuePrice" numeric,
+    "OptionPrice" numeric,
+    "GuaranteeFee" numeric,
+    "GuaranteeFeeCurrency" character varying,
+    "IssueCost" numeric,
+    "IssueCostCurrency" character varying,
+    "IssueCostPayer" character varying,
     PRIMARY KEY (id)
 );
 
@@ -22,6 +31,7 @@ CREATE TABLE IF NOT EXISTS public.coupon_observation_dates
     "Coupon_TriggerType" character varying,
     "Coupon_TriggerLevel" numeric,
     "Note_id" bigint,
+    "Accrual_Start" date,
     PRIMARY KEY ("id_CouponObservationDates")
 );
 
@@ -31,15 +41,18 @@ CREATE TABLE IF NOT EXISTS public.autocall_trigger_levels
     "Autocall_TriggerLevel" numeric,
     "Autocall_TriggerType" character varying,
     "CouponObservationDate_id" bigint,
+    "Autocall_TriggerPayment" numeric,
     PRIMARY KEY ("id_Autocall_TriggerLevels")
 );
 
 CREATE TABLE IF NOT EXISTS public.equities
 (
     "id_Equities" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
-    "Noted_id" bigint,
-    "EquityName" character varying,
-    "EquityInitialLevels" numeric,
+    "Noted_id" bigint NOT NULL,
+    "EquityName" character varying NOT NULL,
+    "EquityInitialLevels" numeric NOT NULL,
+    "EquitySplitCoef" numeric,
+    "EquityInitialLevelsAdj" numeric,
     PRIMARY KEY ("id_Equities")
 );
 
@@ -47,10 +60,11 @@ CREATE TABLE IF NOT EXISTS public.coupon_dates
 (
     "id_CouponDates" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     "CouponObservationDate_id" bigint,
-    "CouponDates" date,
-    "Coupon_RatePerAnnum" numeric,
+    "CouponDates" date NOT NULL,
+    "Coupon_RatePerAnnum" numeric NOT NULL,
     "Coupon_GuaranteedPerAnnum" numeric,
-    "Coupon_IsMemory" boolean,
+    "Coupon_IsMemory" boolean NOT NULL,
+    "DerivativePaymentDate" date,
     PRIMARY KEY ("id_CouponDates")
 );
 
@@ -58,18 +72,18 @@ CREATE TABLE IF NOT EXISTS public.funding_dates
 (
     "id_FundingDates" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     "Note_id" bigint,
-    "FundingDate" date,
-    "FundingRate" numeric,
+    "FundingDate" date NOT NULL,
+    "FundingRate" numeric NOT NULL,
     PRIMARY KEY ("id_FundingDates")
 );
 
-CREATE TABLE IF NOT EXISTS public."Prepayment"
+CREATE TABLE IF NOT EXISTS public.buy_back
 (
-    "id_Prepayment" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
+    "id_BuyBack" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     "Note_id" bigint,
-    "PrepaymentDate" date,
-    "PrepaymentAmount" numeric,
-    PRIMARY KEY ("id_Prepayment")
+    "BuyBackDate" date,
+    "BuyBackAmount" numeric,
+    PRIMARY KEY ("id_BuyBack")
 );
 
 CREATE TABLE IF NOT EXISTS public.maturity_payoff
@@ -79,7 +93,7 @@ CREATE TABLE IF NOT EXISTS public.maturity_payoff
     "MaturityDate" date,
     "MaturityPayoff_Type" character varying,
     "MaturityPayoff_TriggerType" character varying,
-    "MaturityPayoff_Strike" numeric,
+    "MaturityPayoff_Strike" numeric NOT NULL,
     "MaturityPayoff_KnockInTriggerType" character varying,
     "MaturityPayoff_KnockInDirection" character varying,
     "MaturityPayoff_KnockInLevel" numeric,
@@ -116,7 +130,7 @@ ALTER TABLE public.funding_dates
     NOT VALID;
 
 
-ALTER TABLE public."Prepayment"
+ALTER TABLE public.buy_back
     ADD FOREIGN KEY ("Note_id")
     REFERENCES public.note_params (id)
     NOT VALID;
