@@ -28,14 +28,29 @@ def get_data_from_database():
 
 def main():
     notes_excel_file_name = "SN_database_2.xlsx"
-    isin_values, notional_values, coupon_values, fix_date_values, currency_values = parce_excel(notes_excel_file_name)
-    values = [isin_values, notional_values, fix_date_values, currency_values]
+    isin_values, issue_date_values, notional_values, currency_values, fix_date_values, \
+    coupon_trigger_values, coupon_values, fix_date_note_id = parce_excel(notes_excel_file_name)
 
+    #connect to database
     conn = connect_to_database()
 
-    #get_data_from_database()
+    #insert into note_params
     table_name = 'note_params'
     columns = ['ISIN', 'Notional', 'IssueDate', 'Currency']
-    insert_data(conn, table_name, columns, values)
+    values = [isin_values, notional_values, issue_date_values, currency_values]
+    insert_data(conn, table_name, columns, values, num_of_notes=5)
+
+    #insert into observation dates
+    table_name = 'coupon_observation_dates'
+    columns = ['CouponObservationDate', 'Coupon_TriggerLevel', 'Note_id']
+    values = [fix_date_values, coupon_trigger_values, fix_date_note_id]
+    insert_data(conn, table_name, columns, values, num_of_notes=5)
+
+    # close connection
+    if conn:
+        cursor.close()
+        conn.close()
+        print("PostgreSQL connection for notes database is closed")
+
 if __name__ == '__main__':
     main()

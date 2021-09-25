@@ -7,7 +7,7 @@ pd.set_option("display.width", 2000)
 
 
 
-def insert_data(conn, table_name, columns, values):
+def insert_data(conn, table_name, columns, values, num_of_notes):
     column_str = str()
     values_str = ''
     column_len = len(columns)
@@ -25,21 +25,19 @@ def insert_data(conn, table_name, columns, values):
     query_insert = "insert into " + table_name + " (" + column_str + ") values " + "(" + values_str + ");"
 
     cursor = conn.cursor()
-    for i in range(len(values[0])):
+    for note_count in range(num_of_notes):
         records_to_insert = ()
-        for col_value in values:
-            records_to_insert = records_to_insert + (col_value[i][0],)
-    #record_to_insert = ('23.09.2021', 'Sell', 'USD', 100000, 'XS132434')
+        value_cnt_tmp = 0
+        for elem_cnt in range(len(values[value_cnt_tmp][note_count])):
+            for value_cnt in range(len(values)):
+                records_to_insert = records_to_insert + (values[value_cnt][note_count][elem_cnt],)
+                #record_to_insert = ('23.09.2021', 'Sell', 'USD', 100000, 'XS132434')
 
+            cursor.execute(query_insert, records_to_insert)
+            conn.commit()
+            count = cursor.rowcount
+            print(count, "Record inserted successfully into notes table")
+            records_to_insert = ()
 
-        cursor.execute(query_insert, records_to_insert)
-        conn.commit()
-        count = cursor.rowcount
-        print(count, "Record inserted successfully into notes table")
-
-    if conn:
-        cursor.close()
-        conn.close()
-        print("PostgreSQL connection is closed")
 
     return 0
