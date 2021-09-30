@@ -29,7 +29,7 @@ def get_data_from_database():
 def main():
     notes_excel_file_name = "SN_database_2.xlsx"
     # number of notes from excel to parce
-    num_of_notes = 5
+    num_of_notes = 8
 
     # getting notes params from excel
     isin_values, issue_date_values, notional_values, note_id, currency_values, coupon_values, coupon_uncon_values, reoffer_values, coupon_obs_date_values, \
