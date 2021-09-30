@@ -33,8 +33,9 @@ def main():
 
     # getting notes params from excel
     isin_values, issue_date_values, notional_values, note_id, currency_values, coupon_values, coupon_uncon_values, reoffer_values, coupon_obs_date_values, \
-    accrual_start_date_values, accrual_end_date_values, coupon_paydate_values, funding_start_date_values, coupon_trigger_values, autocall_trigger_values, \
-    equity_name_values, equity_initial_levels_values, coupon_paydate_id = parce_excel(notes_excel_file_name)
+    funding_fix_date_values, funding_acc_start_date_values, funding_acc_end_date_values, funding_pay_date_values, coupon_paydate_values, coupon_accrual_start_date_values, \
+    coupon_accrual_end_date_values, coupon_trigger_values, autocall_trigger_values, equity_name_values, equity_initial_levels_values, coupon_paydate_id, equity_id, \
+    fund_date_note_id = parce_excel(notes_excel_file_name)
 
     #connect to database
     conn = connect_to_database()
@@ -49,7 +50,7 @@ def main():
     #insert into observation dates
     table_name = 'coupon_observation_dates'
     columns = ['CouponObservationDate', 'Coupon_TriggerLevel', 'Note_id', 'Accrual_Start', 'Accrual_End']
-    values = [coupon_obs_date_values, coupon_trigger_values, note_id, accrual_start_date_values, accrual_end_date_values]
+    values = [coupon_obs_date_values, coupon_trigger_values, note_id, coupon_accrual_start_date_values, coupon_accrual_end_date_values]
     num_of_inserted_rows = insert_data(conn, table_name, columns, values, num_of_notes)
     print(num_of_inserted_rows, "Records inserted successfully into " + table_name)
 
@@ -66,6 +67,27 @@ def main():
             coupon_uncon_values[note_num].append(coupon_uncon_values[note_num][0])
 
     values = [coupon_paydate_id, coupon_paydate_values, coupon_values, coupon_uncon_values]
+    num_of_inserted_rows = insert_data(conn, table_name, columns, values, num_of_notes)
+    print(num_of_inserted_rows, "Records inserted successfully into " + table_name)
+
+    #insert into autocall_trigger_levels
+    table_name = 'autocall_trigger_levels'
+    columns = ['Autocall_TriggerLevel', 'CouponObservationDate_id']
+    values = [autocall_trigger_values, coupon_paydate_id]
+    num_of_inserted_rows = insert_data(conn, table_name, columns, values, num_of_notes)
+    print(num_of_inserted_rows, "Records inserted successfully into " + table_name)
+
+    # insert into equity
+    table_name = 'equities'
+    columns = ['Note_id', 'EquityName', 'EquityInitialLevels']
+    values = [equity_id, equity_name_values, equity_initial_levels_values]
+    num_of_inserted_rows = insert_data(conn, table_name, columns, values, num_of_notes)
+    print(num_of_inserted_rows, "Records inserted successfully into " + table_name)
+
+    # insert into funding
+    table_name = 'funding'
+    columns = ['Note_id', 'FundFixDate', 'FundAccrualStart', 'FundAccrualEnd', 'FundPayDate']
+    values = [fund_date_note_id, funding_fix_date_values, funding_acc_start_date_values, funding_acc_end_date_values, funding_pay_date_values]
     num_of_inserted_rows = insert_data(conn, table_name, columns, values, num_of_notes)
     print(num_of_inserted_rows, "Records inserted successfully into " + table_name)
 

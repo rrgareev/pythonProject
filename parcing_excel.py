@@ -87,10 +87,19 @@ def parce_excel(file):
     accrual_end_date_col_list = np.arange(accrual_end_date_col_start, df_num_cols + accrual_end_date_col_start, notes_columns).tolist()
     coupon_paydate_col_list = np.arange(paydate_col_start, df_num_cols + paydate_col_start, notes_columns).tolist()
     # funding
-    funding_start_date_row = 42
-    funding_start_date_row_list = np.arange(funding_start_date_row, funding_start_date_row + 1, 1)
-    funding_start_date_col_start = 2
-    funding_start_date_col_list = np.arange(funding_start_date_col_start, df_num_cols + funding_start_date_col_start, notes_columns).tolist()
+    funding_fix_date_row_start = 42
+    funding_fix_date_row_end = 78
+
+    funding_fix_date_row_list = np.arange(funding_fix_date_row_start, funding_fix_date_row_end, 1)
+    funding_fix_date_col = 2
+    funding_fix_date_col_list = np.arange(funding_fix_date_col, df_num_cols + funding_fix_date_col, notes_columns).tolist()
+    funding_acc_start_date_col = 3
+    funding_acc_start_col_list = np.arange(funding_acc_start_date_col, df_num_cols + funding_acc_start_date_col, notes_columns).tolist()
+    funding_acc_end_date_col = 4
+    funding_acc_end_col_list = np.arange(funding_acc_end_date_col, df_num_cols + funding_acc_end_date_col, notes_columns).tolist()
+    funding_pay_date_col = 5
+    funding_pay_col_list = np.arange(funding_pay_date_col, df_num_cols + funding_pay_date_col, notes_columns).tolist()
+
     # coupon_trigger location
     coupon_trigger_row = 80
     coupon_trigger_row_end = 117
@@ -130,8 +139,13 @@ def parce_excel(file):
     coupon_uncon_values = get_data_value(df, coupon_uncond_row_list, coupon_uncond_col_list, is_id=False)
     reoffer_values = get_data_value(df, reoffer_row_list, reoffer_col_list, is_id=False)
     coupon_obs_date_values, note_id = get_data_value(df, coupon_obs_date_row_list, coupon_obs_date_col_list, is_id=True)
-    accrual_start_date_values = get_data_value(df, accrual_start_date_row_list, accrual_start_date_col_list, is_id=False)
-    accrual_end_date_values = get_data_value(df, accrual_end_date_row_list, accrual_end_date_col_list, is_id=False)
+    funding_fix_date_values, fund_date_note_id = get_data_value(df, funding_fix_date_row_list, funding_fix_date_col_list, is_id=True)
+    funding_acc_start_date_values = get_data_value(df, funding_fix_date_row_list, funding_acc_start_col_list, is_id=False)
+    funding_acc_end_date_values = get_data_value(df, funding_fix_date_row_list, funding_acc_end_col_list, is_id=False)
+    funding_pay_date_values = get_data_value(df, funding_fix_date_row_list, funding_pay_col_list, is_id=False)
+
+    coupon_accrual_start_date_values = get_data_value(df, accrual_start_date_row_list, accrual_start_date_col_list, is_id=False)
+    coupon_accrual_end_date_values = get_data_value(df, accrual_end_date_row_list, accrual_end_date_col_list, is_id=False)
     coupon_paydate_values = get_data_value(df, coupon_paydate_row_list, coupon_paydate_col_list, is_id=False)
     coupon_paydate_id = []
     counter = 1
@@ -141,12 +155,13 @@ def parce_excel(file):
             temp_list.append(counter)
             counter += 1
         coupon_paydate_id.append(temp_list)
-    funding_start_date_values = get_data_value(df, funding_start_date_row_list, funding_start_date_col_list, is_id=False)
+
     coupon_trigger_values = get_data_value(df, coupon_trigger_row_list, coupon_trigger_col_list, is_id=False)
     autocall_trigger_values = get_data_value(df, autocall_trigger_row_list, autocall_trigger_col_list, is_id=False)
-    equity_name_values = get_data_value(df, equity_name_row_list, equity_name_col_list, is_id=False)
+    equity_name_values, equity_id = get_data_value(df, equity_name_row_list, equity_name_col_list, is_id=True)
     equity_initial_levels_values = get_data_value(df, equity_initial_levels_row_list, equity_initial_levels_col_list, is_id=False)
 
     return isin_values, issue_date_values, notional_values, note_id, currency_values, coupon_values, coupon_uncon_values, reoffer_values, coupon_obs_date_values, \
-           accrual_start_date_values, accrual_end_date_values, coupon_paydate_values, funding_start_date_values, coupon_trigger_values, autocall_trigger_values, \
-           equity_name_values, equity_initial_levels_values, coupon_paydate_id
+           funding_fix_date_values, funding_acc_start_date_values, funding_acc_end_date_values, funding_pay_date_values, coupon_paydate_values, coupon_accrual_start_date_values, \
+           coupon_accrual_end_date_values, coupon_trigger_values, autocall_trigger_values, equity_name_values, equity_initial_levels_values, coupon_paydate_id, equity_id, \
+           fund_date_note_id
