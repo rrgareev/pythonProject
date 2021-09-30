@@ -25,6 +25,13 @@ def insert_data(conn, table_name, columns, values, num_of_notes):
     query_insert = "insert into " + table_name + " (" + column_str + ") values " + "(" + values_str + ");"
 
     cursor = conn.cursor()
+
+    #delete old rows
+    query_delete_rows = "truncate table " + table_name + " restart identity cascade;"
+    cursor.execute(query_delete_rows)
+    conn.commit()
+    #insert new rows
+    num_of_inserted_rows = 0
     for note_count in range(num_of_notes):
         records_to_insert = ()
         value_cnt_tmp = 0
@@ -36,8 +43,8 @@ def insert_data(conn, table_name, columns, values, num_of_notes):
             cursor.execute(query_insert, records_to_insert)
             conn.commit()
             count = cursor.rowcount
-            print(count, "Record inserted successfully into notes table")
+            num_of_inserted_rows += count
             records_to_insert = ()
 
 
-    return 0
+    return num_of_inserted_rows

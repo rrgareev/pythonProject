@@ -28,27 +28,49 @@ def get_data_from_database():
 
 def main():
     notes_excel_file_name = "SN_database_2.xlsx"
-    isin_values, issue_date_values, notional_values, currency_values, fix_date_values, \
-    coupon_trigger_values, coupon_values, fix_date_note_id = parce_excel(notes_excel_file_name)
+    # number of notes from excel to parce
+    num_of_notes = 5
+
+    # getting notes params from excel
+    isin_values, issue_date_values, notional_values, note_id, currency_values, coupon_values, coupon_uncon_values, reoffer_values, coupon_obs_date_values, \
+    accrual_start_date_values, accrual_end_date_values, coupon_paydate_values, funding_start_date_values, coupon_trigger_values, autocall_trigger_values, \
+    equity_name_values, equity_initial_levels_values, coupon_paydate_id = parce_excel(notes_excel_file_name)
 
     #connect to database
     conn = connect_to_database()
 
     #insert into note_params
     table_name = 'note_params'
-    columns = ['ISIN', 'Notional', 'IssueDate', 'Currency']
-    values = [isin_values, notional_values, issue_date_values, currency_values]
-    insert_data(conn, table_name, columns, values, num_of_notes=5)
+    columns = ['ISIN', 'Notional', 'IssueDate', 'Currency', 'Reoffer']
+    values = [isin_values, notional_values, issue_date_values, currency_values, reoffer_values]
+    num_of_inserted_rows = insert_data(conn, table_name, columns, values, num_of_notes)
+    print(num_of_inserted_rows, "Records inserted successfully into " + table_name)
 
     #insert into observation dates
     table_name = 'coupon_observation_dates'
-    columns = ['CouponObservationDate', 'Coupon_TriggerLevel', 'Note_id']
-    values = [fix_date_values, coupon_trigger_values, fix_date_note_id]
-    insert_data(conn, table_name, columns, values, num_of_notes=5)
+    columns = ['CouponObservationDate', 'Coupon_TriggerLevel', 'Note_id', 'Accrual_Start', 'Accrual_End']
+    values = [coupon_obs_date_values, coupon_trigger_values, note_id, accrual_start_date_values, accrual_end_date_values]
+    num_of_inserted_rows = insert_data(conn, table_name, columns, values, num_of_notes)
+    print(num_of_inserted_rows, "Records inserted successfully into " + table_name)
+
+    #insert into coupon coupon_dates
+    table_name = 'coupon_dates'
+    columns = ['CouponObservationDate_id', 'CouponDates', 'Coupon_RatePerAnnum', 'Coupon_GuaranteedPerAnnum']
+    for note_num in range(num_of_notes):
+        for i in range(len(coupon_paydate_values[note_num])-1):
+            if len(coupon_values[note_num]) == 0:
+                coupon_values[note_num].append(0)
+            if len(coupon_uncon_values[note_num]) == 0:
+                coupon_uncon_values[note_num].append(0)
+            coupon_values[note_num].append(coupon_values[note_num][0])
+            coupon_uncon_values[note_num].append(coupon_uncon_values[note_num][0])
+
+    values = [coupon_paydate_id, coupon_paydate_values, coupon_values, coupon_uncon_values]
+    num_of_inserted_rows = insert_data(conn, table_name, columns, values, num_of_notes)
+    print(num_of_inserted_rows, "Records inserted successfully into " + table_name)
 
     # close connection
     if conn:
-        cursor.close()
         conn.close()
         print("PostgreSQL connection for notes database is closed")
 
